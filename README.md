@@ -31,7 +31,7 @@ Configure your environment:
 Start the API and PostgreSQL using Docker Compose:
 
 ```bash
-docker compose up -d --build
+docker compose up --build 
 ```
 
 Run database migrations inside the API container:
