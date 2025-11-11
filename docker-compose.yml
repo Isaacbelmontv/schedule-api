@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: schedule-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      # ⚙️ Variables de entorno que Symfony usa para conectar la DB
+      DATABASE_URL: "postgresql://symfony:symfony@database:5432/symfony?serverVersion=16&charset=utf8"
+    depends_on:
+      database:
+        condition: service_healthy
+    command: bash -c "composer install && php -S 0.0.0.0:8000 -t public"
+
+  database:
+    image: postgres:16-alpine
+    container_name: schedule-api-database
+    environment:
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: symfony
+      POSTGRES_DB: symfony
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U symfony"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
