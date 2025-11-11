@@ -33,26 +33,16 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'schedules')]
 class Schedule
 {
-    public const DAYS_OF_WEEK = [
-        'monday' => 'monday',
-        'tuesday' => 'tuesday',
-        'wednesday' => 'wednesday',
-        'thursday' => 'thursday',
-        'friday' => 'friday',
-        'saturday' => 'saturday',
-        'sunday' => 'sunday',
-    ];
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(type: 'date')]
     #[Assert\NotBlank]
-    #[Assert\Choice(choices: self::DAYS_OF_WEEK)]
+    #[Assert\Type(\DateTimeInterface::class)]
     #[Groups(['schedule:read', 'schedule:write'])]
-    private ?string $day = null;
+    private ?\DateTimeInterface $day = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     #[Assert\NotBlank]
