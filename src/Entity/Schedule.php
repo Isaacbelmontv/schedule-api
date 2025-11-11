@@ -24,8 +24,14 @@ use Symfony\Component\Validator\Constraints as Assert;
         new Patch(),
         new Delete()
     ],
-    normalizationContext: ['groups' => ['schedule:read']],
-    denormalizationContext: ['groups' => ['schedule:write']],
+    normalizationContext: [
+        'groups' => ['schedule:read'],
+        'datetime_format' => 'Y-m-d',
+    ],
+    denormalizationContext: [
+        'groups' => ['schedule:write'],
+        'datetime_format' => 'Y-m-d',
+    ],
     routePrefix: '/api'
 )]
 #[ORM\Entity(repositoryClass: ScheduleRepository::class)]
@@ -44,16 +50,34 @@ class Schedule
     #[Groups(['schedule:read', 'schedule:write'])]
     private ?\DateTimeInterface $day = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[ORM\Column(type: 'time')]
     #[Assert\NotBlank]
-    #[Groups(['schedule:read', 'schedule:write'])]
+    #[Groups(['schedule:write'])]
     private ?\DateTimeInterface $startTime = null;
 
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[ORM\Column(type: 'time')]
     #[Assert\NotBlank]
     #[Assert\GreaterThan(propertyPath: 'startTime', message: 'End time must be after start time')]
-    #[Groups(['schedule:read', 'schedule:write'])]
+    #[Groups(['schedule:write'])]
     private ?\DateTimeInterface $endTime = null;
+
+    /**
+     * Get start time in H:i format
+     * @Groups({"schedule:read"})
+     */
+    public function getStartTimeFormatted(): string
+    {
+        return $this->startTime ? $this->startTime->format('H:i') : '';
+    }
+
+    /**
+     * Get end time in H:i format
+     * @Groups({"schedule:read"})
+     */
+    public function getEndTimeFormatted(): string
+    {
+        return $this->endTime ? $this->endTime->format('H:i') : '';
+    }
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['schedule:read'])]

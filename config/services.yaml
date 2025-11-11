@@ -18,10 +18,3 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
-
-    # Time normalizer for formatting time values in API responses
-    App\Serializer\Normalizer\TimeNormalizer:
-        tags: ['serializer.normalizer']
-        arguments: ['@serializer.normalizer.object']
-        tags:
-            - { name: 'serializer.normalizer', priority: 32 }
