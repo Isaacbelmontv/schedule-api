@@ -27,6 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: [
         'groups' => ['schedule:read'],
         'datetime_format' => 'Y-m-d',
+        'time_format' => 'H:i',
     ],
     denormalizationContext: [
         'groups' => ['schedule:write'],
@@ -50,34 +51,65 @@ class Schedule
     #[Groups(['schedule:read', 'schedule:write'])]
     private ?\DateTimeInterface $day = null;
 
+    /**
+     * @param string|\DateTimeInterface $day
+     */
+    public function setDay($day): self
+    {
+        if (is_string($day)) {
+            $this->day = new \DateTimeImmutable($day);
+        } else if ($day instanceof \DateTimeInterface) {
+            $this->day = $day;
+        } else if ($day !== null) {
+            throw new \InvalidArgumentException('Day must be a string or DateTimeInterface');
+        }
+
+        return $this;
+    }
+
     #[ORM\Column(type: 'time')]
     #[Assert\NotBlank]
-    #[Groups(['schedule:write'])]
+    #[Groups(['schedule:read', 'schedule:write'])]
     private ?\DateTimeInterface $startTime = null;
+
+    /**
+     * @param string|\DateTimeInterface $time
+     */
+    public function setStartTime($time): self
+    {
+        if (is_string($time)) {
+            $this->startTime = \DateTimeImmutable::createFromFormat('H:i', $time);
+        } else if ($time instanceof \DateTimeInterface) {
+            $this->startTime = $time;
+        } else if ($time !== null) {
+            throw new \InvalidArgumentException('Start time must be a string in H:i format or DateTimeInterface');
+        }
+
+        return $this;
+    }
 
     #[ORM\Column(type: 'time')]
     #[Assert\NotBlank]
     #[Assert\GreaterThan(propertyPath: 'startTime', message: 'End time must be after start time')]
-    #[Groups(['schedule:write'])]
+    #[Groups(['schedule:read', 'schedule:write'])]
     private ?\DateTimeInterface $endTime = null;
 
     /**
-     * Get start time in H:i format
-     * @Groups({"schedule:read"})
+     * @param string|\DateTimeInterface $time
      */
-    public function getStartTimeFormatted(): string
+    public function setEndTime($time): self
     {
-        return $this->startTime ? $this->startTime->format('H:i') : '';
+        if (is_string($time)) {
+            $this->endTime = \DateTimeImmutable::createFromFormat('H:i', $time);
+        } else if ($time instanceof \DateTimeInterface) {
+            $this->endTime = $time;
+        } else if ($time !== null) {
+            throw new \InvalidArgumentException('End time must be a string in H:i format or DateTimeInterface');
+        }
+
+        return $this;
     }
 
-    /**
-     * Get end time in H:i format
-     * @Groups({"schedule:read"})
-     */
-    public function getEndTimeFormatted(): string
-    {
-        return $this->endTime ? $this->endTime->format('H:i') : '';
-    }
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Groups(['schedule:read'])]
@@ -109,37 +141,25 @@ class Schedule
         return $this->id;
     }
 
-    public function getDay(): ?string
+    public function getDay(): ?\DateTimeInterface
     {
         return $this->day;
     }
 
-    public function setDay(string $day): self
+    /**
+     * @Groups({"schedule:read"})
+     */
+    public function getStartTime(): ?string
     {
-        $this->day = $day;
-        return $this;
+        return $this->startTime ? $this->startTime->format('H:i') : null;
     }
 
-    public function getStartTime(): ?\DateTimeInterface
+    /**
+     * @Groups({"schedule:read"})
+     */
+    public function getEndTime(): ?string
     {
-        return $this->startTime;
-    }
-
-    public function setStartTime(\DateTimeInterface $startTime): self
-    {
-        $this->startTime = $startTime;
-        return $this;
-    }
-
-    public function getEndTime(): ?\DateTimeInterface
-    {
-        return $this->endTime;
-    }
-
-    public function setEndTime(\DateTimeInterface $endTime): self
-    {
-        $this->endTime = $endTime;
-        return $this;
+        return $this->endTime ? $this->endTime->format('H:i') : null;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface
