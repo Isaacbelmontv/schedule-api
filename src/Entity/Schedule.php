@@ -43,6 +43,7 @@ class Schedule
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['schedule:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: 'date')]

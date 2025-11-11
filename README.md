@@ -26,6 +26,22 @@ Configure your environment:
 - Copy `.env.example` to `.env`
 - Update database configuration in `.env`
 
+## Run with Docker
+
+Start the API and PostgreSQL using Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+Run database migrations inside the API container:
+
+```bash
+docker compose exec api php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+- API: [http://localhost:8000](http://localhost:8000)
+
 ## API Endpoints
 
 Postman Collection:
